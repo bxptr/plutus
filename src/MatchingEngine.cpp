@@ -76,6 +76,10 @@ bool MatchingEngine::validateCancelReplace(const CancelReplaceMessage &msg) {
     return true;
 }
 
+double MatchingEngine::getLastTradePrice() const {
+    return orderBook.getLastTradePrice();
+}
+
 bool MatchingEngine::processAdd(const AddMessage &msg) {
     if (!validateAdd(msg)) return false;
 
@@ -166,6 +170,7 @@ void MatchingEngine::processSnapshotRequest(const SnapshotRequest &msg) {
     resp.header.timestamp = (uint64_t)std::chrono::system_clock::now().time_since_epoch().count();
     resp.symbol = msg.symbol;
     orderBook.getTopOfBook(resp.bestBid, resp.bestAsk);
+    resp.lastTradePrice = orderBook.getLastTradePrice();
     LOG(LogLevel::INFO, "Snapshot for " << msg.symbol << ": bestBid=" << resp.bestBid << ", bestAsk=" << resp.bestAsk);
 }
 

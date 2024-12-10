@@ -82,6 +82,15 @@ void EngineController::dispatchSnapshotRequest(const SnapshotRequest &msg) {
     it->second->processSnapshotRequest(msg);
 }
 
+double EngineController::getLastTradePrice(const std::string &symbol) const {
+    std::shared_lock lock(enginesMutex);
+    auto it = engines.find(symbol);
+    if (it == engines.end()) {
+        throw std::runtime_error("getLastTradePrice: No machine engine for symbol");
+    }
+    return it->second->getLastTradePrice();
+}
+
 void EngineController::recordOrderSymbol(uint64_t orderId, const std::string &symbol) {
     std::lock_guard<std::mutex> lock(orderSymbolMapMutex);
     orderSymbolMap[orderId] = symbol;

@@ -80,8 +80,8 @@ struct SnapshotRequest {
 struct SnapshotResponse {
     MessageHeader header;
     std::string symbol;
-    // Snapshot details: top of book, etc.
     double bestBid;
     double bestAsk;
+    double lastTradePrice;
     // Could add more levels later but not required for now
 };

@@ -10,6 +10,7 @@ class MatchingEngine {
 public:
     MatchingEngine(const std::string& symbol, Replay& replay, MemoryPool<Order>& pool, SymbolConfigManager &configManager);
 
+    double getLastTradePrice();
     bool processAdd(const AddMessage &msg);
     bool processCancel(const CancelMessage &msg);
     bool processCancelReplace(const CancelReplaceMessage &msg);

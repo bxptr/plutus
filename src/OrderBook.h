@@ -27,6 +27,7 @@ public:
     void setMemoryPool(MemoryPool<Order>* pool) { orderPool_ = pool; }
 
     // Add a trade price to track volatility
+    double getLastTradePrice();
     void recordTradePrice(double price);
 
     // Trigger stop-loss orders if conditions are met
@@ -56,9 +57,11 @@ private:
 
     std::vector<ExecutionMessage> matchBook(uint64_t seqBase, uint64_t timestamp);
 
-    // For volatility tracking (not required to store all trades here, just a few for demonstration)
+    // For volatility tracking
     double lastTradePrice = 0.0;
     bool haveLastTrade = false;
+    std::deque<std::pair<double, uint64_t>> recentTrades; // Price, Quantity
+    size_t maxRecentTrades = 100; // Maintain last 100 trades
 
     // Helper for iceberg orders: refresh visible qty after partial fills
     void refreshIceberg(Order* o);

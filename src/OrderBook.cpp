@@ -199,7 +199,7 @@ std::vector<ExecutionMessage> OrderBook::matchBook(uint64_t seqBase, uint64_t ti
         bidOrder->quantity -= tradeQty;
         askOrder->quantity -= tradeQty;
 
-        recordTradePrice(tradePrice);
+        recordTradePrice(tradePrice, tradeQty);
         if (bidOrder->orderType == OrderType::ICEBERG) refreshIceberg(bidOrder);
         if (askOrder->orderType == OrderType::ICEBERG) refreshIceberg(askOrder);
 
@@ -228,9 +228,24 @@ std::vector<ExecutionMessage> OrderBook::matchBook(uint64_t seqBase, uint64_t ti
     return trades;
 }
 
-void OrderBook::recordTradePrice(double price) {
-    lastTradePrice = price;
-    haveLastTrade = true;
+double OrderBook::getLastTradePrice() const {
+    std::shared_lock<std::shared_mutex> lock(bookMutex);
+    // Use a Volume-Weighted Average Price
+    double totalValue = 0.0;
+    uint64_t totalVolume = 0;
+    for (const auto &[price, quantity] : recentTrade) {
+        totalValue += price * quantity;
+        totalVolume += quantity;
+    }
+    return (totalVolume > 0) ? (totalValue / totalVolume) : 0.0;
+}
+
+void OrderBook::recordTradePrice(double price, uint64_t quantity) {
+    std::unique_lock<std::shared_mutex> lock(bookMutex);
+    recentTrades.emplace_back(price, quantity);
+    if (recentTrades.size() > maxRecentTrades) {
+        recentTrades.pop_front();
+    }
 }
 
 void OrderBook::triggerStopOrders(uint64_t timestamp, uint64_t &seqBase) {

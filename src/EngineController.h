@@ -15,12 +15,13 @@ public:
     bool dispatchCancel(const CancelMessage &msg);
     bool dispatchCancelReplace(const CancelReplaceMessage &msg);
     void dispatchSnapshotRequest(const SnapshotRequest &msg);
-
+    double getLastTradePrice(const std::string &symbol) const;
+    
     void addEngineForSymbol(const std::string &symbol, double tickSize, uint64_t minQty, double minP, double maxP, double volThreshold, double refPrice);
 
 private:
     std::unordered_map<std::string, MatchingEngine*> engines;
-    std::shared_mutex enginesMutex; 
+    mutable std::shared_mutex enginesMutex; 
     Replay &replayLog;
     MemoryPool<Order> orderPool; 
     SymbolConfigManager &configManager;
