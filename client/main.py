@@ -1,60 +1,29 @@
-import socket
-import time
+from client import Client 
+from order import Order, OrderManager
 
-HOST = "127.0.0.1"
-PORT = 9999
+manager = OrderManager("orders.json")
 
-def send_and_receive(sock: socket.socket, message: str) -> str:
-    print(f"Sending: {message.strip()}")
-    sock.sendall(message.encode('utf-8'))
-    response = sock.recv(4096).decode('utf-8')
-    print(f"Response: {response.strip()}")
-    return response
-
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sock.connect((HOST, PORT))
-print(f"Connected")
+client = Client("127.0.0.1", 9999, manager)
+client.connect()
 
 # Add a LIMIT order
-message = f"ADD|1|{int(time.time())}|1|AAPL|110.0|10|BUY|GTC|LIMIT|1|0.0|10\n"
-send_and_receive(sock, message)
-
-# Add a MARKET order
-message = f"ADD|2|{int(time.time())}|2|AAPL|0.0|5|SELL|IOC|MARKET|2|0.0|5\n"
-send_and_receive(sock, message)
-
-# Add a STOP-LOSS order
-message = f"ADD|3|{int(time.time())}|3|AAPL|0.0|8|BUY|GTC|STOP_LOSS|3|105.0|8\n"
-send_and_receive(sock, message)
-
-# Add an ICEBERG order
-message = f"ADD|4|{int(time.time())}|4|AAPL|115.0|20|SELL|GTC|ICEBERG|4|0.0|5\n"
-send_and_receive(sock, message)
+order1 = Order(order_id = 1, symbol = "AAPL", side = "BUY", price = 110.0, quantity = 10, order_type = "LIMIT", tif = "GTC")
+print(f"Placing order: {order1}")
+client.add_order(order1)
 
 # Request a snapshot for AAPL
-message = f"SNAPSHOT_REQUEST|5|{int(time.time())}|AAPL\n"
-send_and_receive(sock, message)
+print("Requesting snapshot for AAPL...")
+client.request_snapshot(1, "AAPL")
 
-# Add a LIMIT order for BTCUSD
-message = f"ADD|6|{int(time.time())}|6|BTCUSD|20000.0|1|BUY|FOK|LIMIT|6|0.0|1\n"
-send_and_receive(sock, message)
+# Replace the order
+print(f"Replacing order {order1.order_id}")
+client.cancel_replace_order(order1.order_id, 115.0, 15, 1)
 
-# Request a snapshot for BTCUSD
-message = f"SNAPSHOT_REQUEST|7|{int(time.time())}|BTCUSD\n"
-send_and_receive(sock, message)
+# View current order state
+print("\nOrder State:")
+for order in manager.orders.values():
+    print(order)
 
-# Cancel an order
-message = f"CANCEL|1|{int(time.time())}|1|1\n"
-send_and_receive(sock, message)
-
-# Cancel and replace an order
-message = f"CANCEL_REPLACE|4|{int(time.time())}|4|117.0|25|4\n"
-send_and_receive(sock, message)
-
-# Request VWAP for AAPL 
-message = f"SNAPSHOT_REQUEST|8|{int(time.time())}|AAPL\n"
-send_and_receive(sock, message)
-
-sock.close()
-print("Disconnected")
-
+# Cancel the order
+print(f"Canceling order {order1.order_id}")
+client.cancel_order(order1.order_id, 1)
