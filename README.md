@@ -1,8 +1,8 @@
 # plutus
 advanced high-performance matching engine for financial trading systems
 
-plutus, named after the the [greek god of wealth](https://en.wikipedia.org/wiki/Plutus), is a robust high-performance matching engine, similar
-to those found in stock exchanges today. it's loosely inspired by the [Jane Street](https://www.youtube.com/watch?v=b1e4t2k2KJY)
+plutus, named after the [greek god of wealth](https://en.wikipedia.org/wiki/Plutus), is a robust high-performance matching engine,
+similar to those found in stock exchanges today. it's loosely inspired by the [Jane Street](https://www.youtube.com/watch?v=b1e4t2k2KJY)
 talk on building exchanges, and extends it with a more modern and advanced architecture for real-time order
 matching, risk management, and trade execution.
 
@@ -21,6 +21,8 @@ the client communicates with the server with a rudimentary text-based protocol. 
 ```
 ADD|1|1640995200000|1001|AAPL|150.25|10|BUY|GTC|LIMIT|123|0|0
 ```
+the library in `client/` is a simple order management system wrapper over plutus that serves as a lightweight demo and 
+validation for changes.
 
 i tried to comment parts i found more difficult and write self-documenting code to make it easier to navigate
 and learn, especially to simplify the design choices i made. `make` builds the entire project with c++20 with
