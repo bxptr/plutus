@@ -10,7 +10,7 @@ class MatchingEngine {
 public:
     MatchingEngine(const std::string& symbol, Replay& replay, MemoryPool<Order>& pool, SymbolConfigManager &configManager);
 
-    double getLastTradePrice();
+    double getLastTradePrice() const;
     bool processAdd(const AddMessage &msg);
     bool processCancel(const CancelMessage &msg);
     bool processCancelReplace(const CancelReplaceMessage &msg);
@@ -19,10 +19,11 @@ public:
 
     void step();
 
+    OrderBook orderBook;
+
 private:
     std::string symbol_;
     Replay& replayLog;
-    OrderBook orderBook;
     MemoryPool<Order>& orderPool;
     SymbolConfigManager &configManager;
 

@@ -12,7 +12,7 @@ int main() {
     EngineController controller(replayLog, configManager);
 
     // Add some symbols
-    controller.addEngineForSymbol("AAPL", 0.01, 1, 1.00, 10000.00, 0.2, 100.00);
+    controller.addEngineForSymbol("AAPL", 0.01, 1, 1.00, 10000.00, 0.5, 150.00);
     controller.addEngineForSymbol("BTCUSD", 0.01, 1, 1000.00, 100000.00, 0.3, 20000.00);
 
     NetworkInterface net;

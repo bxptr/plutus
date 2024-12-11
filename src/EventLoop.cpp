@@ -62,7 +62,7 @@ bool EventLoop::handleNewConnection() {
         return true;
     }
 
-    Session *sess = new Session(clientFd, controller_);
+    Session *sess = new Session(clientFd, controller_, kqfd_);
 
     struct kevent ev;
     EV_SET(&ev, clientFd, EVFILT_READ, EV_ADD | EV_ENABLE | EV_CLEAR, 0, 0, nullptr);
@@ -87,14 +87,9 @@ bool EventLoop::handleEvent(int fd, int16_t filter) {
 
     if (filter == EVFILT_READ) {
         if (!sess->onReadable()) return false;
+    } else if (filter == EVFILT_WRITE) {
+        if (!sess->onWritable()) return false;
     }
-
-    // If we had EVFILT_WRITE subscription, we'd handle writable events here.
-    // For simplicity, we rely on blocking writes or handle that scenario separately.
-    // If needed:
-    // if (filter == EVFILT_WRITE) {
-    //     if (!sess->onWritable()) return false;
-    // }
 
     return true;
 }

@@ -233,7 +233,7 @@ double OrderBook::getLastTradePrice() const {
     // Use a Volume-Weighted Average Price
     double totalValue = 0.0;
     uint64_t totalVolume = 0;
-    for (const auto &[price, quantity] : recentTrade) {
+    for (const auto &[price, quantity] : recentTrades) {
         totalValue += price * quantity;
         totalVolume += quantity;
     }

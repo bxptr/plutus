@@ -27,8 +27,8 @@ public:
     void setMemoryPool(MemoryPool<Order>* pool) { orderPool_ = pool; }
 
     // Add a trade price to track volatility
-    double getLastTradePrice();
-    void recordTradePrice(double price);
+    double getLastTradePrice() const;
+    void recordTradePrice(double price, uint64_t quantity);
 
     // Trigger stop-loss orders if conditions are met
     void triggerStopOrders(uint64_t timestamp, uint64_t &seqBase);
@@ -47,7 +47,7 @@ private:
     std::multimap<double, Order*> stopOrdersSell; // trigger when price >= triggerPrice
 
     // Access control
-    std::shared_mutex bookMutex;
+    mutable std::shared_mutex bookMutex;
     MemoryPool<Order>* orderPool_ = nullptr;
 
     // Internal utilities

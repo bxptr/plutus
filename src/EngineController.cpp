@@ -91,6 +91,15 @@ double EngineController::getLastTradePrice(const std::string &symbol) const {
     return it->second->getLastTradePrice();
 }
 
+void EngineController::getTopOfBook(const std::string &symbol, double &bestBid, double &bestAsk) {
+    std::shared_lock lock(enginesMutex);
+    auto it = engines.find(symbol);
+    if (it == engines.end()) {
+        throw std::runtime_error("getTopOfBook: No engine for symbol " + symbol);
+    }
+    it->second->orderBook.getTopOfBook(bestBid, bestAsk);
+}
+
 void EngineController::recordOrderSymbol(uint64_t orderId, const std::string &symbol) {
     std::lock_guard<std::mutex> lock(orderSymbolMapMutex);
     orderSymbolMap[orderId] = symbol;

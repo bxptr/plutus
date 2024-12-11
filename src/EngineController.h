@@ -16,6 +16,7 @@ public:
     bool dispatchCancelReplace(const CancelReplaceMessage &msg);
     void dispatchSnapshotRequest(const SnapshotRequest &msg);
     double getLastTradePrice(const std::string &symbol) const;
+    void getTopOfBook(const std::string &symbol, double &bestBid, double &bestAsk);
     
     void addEngineForSymbol(const std::string &symbol, double tickSize, uint64_t minQty, double minP, double maxP, double volThreshold, double refPrice);
 

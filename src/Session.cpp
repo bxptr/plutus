@@ -1,9 +1,11 @@
 #include "Session.h"
 #include "Logging.h"
+#include <sys/event.h>
+#include <sstream>
 #include <unistd.h>
 
-Session::Session(int fd, EngineController &controller)
-    : fd_(fd), controller_(controller) { }
+Session::Session(int fd, EngineController &controller, int kqfd)
+    : fd_(fd), kqfd_(kqfd), controller_(controller) { }
 
 Session::~Session() {
     close(fd_);
@@ -87,6 +89,13 @@ bool Session::onWritable() {
 
 void Session::queueResponse(const std::string &msg) {
     writeQueue_.push_back(msg);
+
+    // Register for writable events
+    struct kevent ev;
+    EV_SET(&ev, fd_, EVFILT_WRITE, EV_ADD | EV_ENABLE, 0, 0, this);
+    if (kevent(kqfd_, &ev, 1, nullptr, 0, nullptr) < 0) {
+        LOG(LogLevel::ERROR, "Failed to register writable event for fd=" << fd_);
+    }
 }
 
 bool Session::handleAdd(const AddMessage &msg) {
@@ -112,7 +121,19 @@ bool Session::handleCancelReplace(const CancelReplaceMessage &msg) {
 
 bool Session::handleSnapshotRequest(const SnapshotRequest &msg) {
     controller_.dispatchSnapshotRequest(msg);
-    queueResponse("SNAPSHOT_SENT\n");
+
+    // Prepare detailed snapshot response
+    double bestBid = 0.0, bestAsk = 0.0, lastTradePrice = 0.0;
+    controller_.getTopOfBook(msg.symbol, bestBid, bestAsk);
+    lastTradePrice = controller_.getLastTradePrice(msg.symbol);
+
+    std::ostringstream response;
+    response << "SNAPSHOT|symbol=" << msg.symbol
+             << "|bestBid=" << bestBid
+             << "|bestAsk=" << bestAsk
+             << "|lastTradePrice=" << lastTradePrice << "\n";
+
+    queueResponse(response.str());
     return true;
 }
 

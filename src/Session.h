@@ -6,7 +6,7 @@
 
 class Session {
 public:
-    Session(int fd, EngineController &controller);
+    Session(int fd, EngineController &controller, int kqfd_);
     ~Session();
 
     int getFd() const { return fd_; }
@@ -16,6 +16,7 @@ public:
     void queueResponse(const std::string &msg);
 
 private:
+    int kqfd_;
     int fd_;
     std::string clientAddr_;
     EngineController &controller_;
